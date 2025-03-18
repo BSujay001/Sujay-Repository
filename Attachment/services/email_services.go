@@ -99,11 +99,6 @@ func FetchEmailIDs(loggedInEmail string) ([]string, error) {
 	// ✅ Process fetched emails
 	for msg := range messages {
 		// ✅ Debugging: Log raw email metadata
-		// log.Printf("📩 Debug: Email Message ID: %v", msg.Envelope.MessageId)
-		// log.Printf("📩 Debug: Email Subject: %v", msg.Envelope.Subject)
-		// log.Printf("📩 Debug: From: %v", msg.Envelope.From)
-		// log.Printf("📩 Debug: To: %v", msg.Envelope.To)
-
 		if msg.Envelope == nil || len(msg.Envelope.From) == 0 || len(msg.Envelope.To) == 0 {
 			//log.Println("⚠️ Skipping email: Missing envelope, sender, or recipient")
 			continue
