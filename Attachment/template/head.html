@@ -1,0 +1,42 @@
+{{define "head"}}
+<html>
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+        <!-- <link rel="stylesheet" href="../style/login.css">
+        <link rel="stylesheet" href="../style/Document.css"> -->
+        <style>
+            .card-body{
+                background-color: #4CAF50;
+                color: white;
+                font-size: 30px;
+                padding: 10px;
+                display: flex;
+                justify-content: space-between;
+            }
+        </style>
+    </head>
+    <body>
+           
+              <div class="px-4 py-3" style="background-color: #4CAF50;">
+                <div style="display: flex; justify-content: space-between;">
+                  <span style="font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 20px; padding-top: 4px; padding-bottom: 4px; color: white;">Vault Dashboard</span>
+                  <span style="font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 20px; padding-bottom: 4px; padding-top: 4px; color: white;">Welcome {{.FromName}} {{ .Email }} <span>
+                    
+                    <!-- <a href="/login" style="text-decoration: none; cursor: pointer; color: white;">Logout</a></span></span> -->
+                    <a href="javascript:void(0);" onclick="logout()" style="text-decoration: none; cursor: pointer; color: white;">Logout</a>
+                  <!-- <span style="font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 20px; padding-bottom: 4px; padding-top: 4px; color: white; text-decoration: none; cursor: pointer;">Logout</span> -->
+                </div>
+              </div>
+         <script>
+          function logout() {
+            fetch('/logout', { method: 'GET' })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url; // Redirect to login page
+                    }
+                })
+                .catch(error => console.error('Logout failed:', error));
+        }
+         </script>     
+    </body>
+{{end}}
