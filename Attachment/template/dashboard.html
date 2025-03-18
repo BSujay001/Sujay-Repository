@@ -1,0 +1,34 @@
+
+{{template "head" .}}
+<body>
+    <!-- <p>You have successfully logged in with the email: {{.Email}} {{printf "%s" .From}}</p> -->
+    <div class="card" style="width: 100px;
+            text-align: center;
+            padding: 20px;
+            border-radius: 3px;
+            background-color: #fff;
+            margin-bottom: 300px;
+            margin-top: 60px;
+            margin-left: 80px;">
+        <div class="icon" style="width: 60px; height: 60px; background-color: #ccd1d1; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px;">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 30px; height: 30px; fill: #4CAF50;">
+                <path d="M21 7h-14c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-6c0-1.1-.9-2-2-2zm-14 2h14v6h-14v-6zm8 2.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5.67 1.5 1.5 1.5 1.5-.67 1.5-1.5zm-10 6.5v-6c0-2.21 1.79-4 4-4h14c2.21 0 4 1.79 4 4v6c0 2.21-1.79 4-4 4h-14c-2.21 0-4-1.79-4-4z"/>
+            </svg>
+        </div>
+        <a href="/document" class="card-link">OPD</a>
+    </div>
+    <script>
+        function logout() {
+          fetch('/logout', { method: 'GET' })
+              .then(response => {
+                  if (response.redirected) {
+                      window.location.href = response.url; // Redirect to login page
+                  }
+              })
+              .catch(error => console.error('Logout failed:', error));
+      }
+       </script>     
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>
+</body>
+{{template "footer" .}}
