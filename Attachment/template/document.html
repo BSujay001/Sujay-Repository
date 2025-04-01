@@ -1,729 +1,1261 @@
 {{template "head" .}}
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="../style/Document.css">
 <style>
-    .btn-default {
-        color: #212121 !important;
-        background-color: rgba(154, 154, 154, 0.18);
+  *{
+    padding: 0;
+    margin: 0;
+    font-family: Arial;
+  }
+  
+  .btn-default {
+      color: #212121 !important;
+      background-color: rgba(154, 154, 154, 0.18);
     }
+  
+  .btn {
+      background-image: none;
+      background-position: 50% 50%;
+      background-size: 100% 100%;
+      border: 0;
+      border-radius: 2px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+      max-width: 100%;
+      padding: 8px 8px;
+      position: relative;
+      text-align: center;
+      text-transform: uppercase;
+  }
+  
+  .card {
+      background-color: #ffffff;
+      border-radius: 2px;
+      box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.06), 0 0 3px rgba(0, 0, 0, 0.18),
+        0 1px 3px rgba(0, 0, 0, 0.18);
+      display: flex;
+      margin-top: 24px;
+      margin-bottom: 24px;
+      position: relative;
+      margin-left: 150px;
+      margin-right: 150px;
+  }
+  
+  .g-2 {
+      margin-left: 20px;
+  }
+  
+  .active-border {
+      border-bottom: 3px solid #ff4081 !important;
+      border-radius: 5px 5px 0 0 !important;
+  }
+    
+  #emailModalBody p {
+    margin: 4px 0 !important;
+    line-height: 1.4;
+  }
+  
+  #emailModalBody br {
+    line-height: 0;
+  }
+  
+  #emailModalBody img {
+    margin: 8px 0;
+  }
+  
+  .table-bordered{
+    margin-top: 20px;
+  }
+  
+  center{
+    margin-left: 20px; 
+    margin-right: 20px;
+  }
 
-    .btn {
-        background-image: none;
-        background-position: 50% 50%;
-        background-size: 100% 100%;
-        border: 0;
-        border-radius: 2px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), 0 1px 3px 1px rgba(0, 0, 0, 0.15);
-        display: inline-block;
-        font-size: 14px;
-        font-weight: 500;
-        line-height: 20px;
-        max-width: 100%;
-        padding: 8px 8px;
-        position: relative;
-        text-align: center;
-        text-transform: uppercase;
-    }
+  #emailModal{
+    display:none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width:100%; 
+    height:100%; 
+    background-color: rgba(0,0,0,0.5); 
+    z-index:9999;
+  }
 
-    .card {
-        background-color: #ffffff;
-        border-radius: 2px;
-        box-shadow: 0 -1px 0 rgba(0, 0, 0, 0.06), 0 0 3px rgba(0, 0, 0, 0.18),
-            0 1px 3px rgba(0, 0, 0, 0.18);
-        display: flex;
-        margin-top: 24px;
-        margin-bottom: 24px;
-        position: relative;
-        margin-left: 150px;
-        margin-right: 150px;
-    }
+  .closemodal{
+    padding: 8px 16px; 
+    font-size: 14px; 
+    border: none; 
+    background-color: #fff; 
+    color: red; 
+    border-radius: 5px; 
+    cursor: pointer;
+  }
 
-    .g-2 {
-        margin-left: 20px;
-    }
 </style>
 <div class="card">
-    <!-- Email Filter Dropdown -->
-    <div class="row g-2 align-items-center">
-        <div class="col-auto">
-            <br><label for="toFilter" class="floating-label">Select Patient :</label>
-            <select id="toFilter" onchange="filterEmails()" style="width: 200px;">
-                    <option value="">Select Recipient</option>
-                    {{range .UniqueRecipients}}
-                    <option value="{{.}}">{{.}}</option>
-                    {{end}}
-                </select>
-        </div>
+  <!-- Email Filter Dropdown -->
+  <div class="row g-2 align-items-center">
+    <div class="col-auto">
+      <br /><label for="toFilter" class="floating-label"
+        >Select Patient :</label
+      >
+      <select id="toFilter" style="width: 200px">
+
+        <option value="">Select Patient</option>
+        {{range .UniqueRecipients}}
+        <option value="{{.}}">{{.}}</option>
+        {{end}}
+      </select>
+      <br /><br />
+      
     </div>
-    <!-- Email Table -->
-    <center style="margin-left: 20px; margin-right: 20px;">
-        <table class="table table-bordered" style="margin-top: 20px">
-            <thead>
-                <tr>
-                    <th style="color: #ffffff; background-color: #4CAF50; text-align: center;">Doctor</th>
-                    <th style="color: #ffffff; background-color: #4CAF50; text-align: center;">Summary of Observation
-                    </th>
-                    <th style="color: #ffffff; background-color: #4CAF50; text-align: center;">Date</th>
-                    <th style="color: #ffffff; background-color: #4CAF50; text-align: center;">Attachments</th>
-                </tr>
-            </thead>
-            <tbody id="emailTableBody">
-                {{ if .Emails }}
-                {{ range .Emails }}
-                <tr>
-                    <td>{{ .FromName }}</td>
-                    <td>{{ .Subject }}</td>
-                    <td>{{ .Date }}</td>
-                    <td>{{ .Attachments }}</td> <!-- Placeholder for attachments -->
-                </tr>
-                {{ end }}
-                {{ else }}
-                <tr class="no-records-row">
-                    <td colspan="4">No emails found</td>
-                </tr>
-                {{ end }}
-            </tbody>
-        </table>
-    </center>
+  </div>
+  <!-- Email Table -->
+  <center>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th
+            style="
+              color: #ffffff;
+              background-color: #4caf50;
+              text-align: center;
+            "
+          >
+            Doctor
+          </th>
+          <th
+            style="
+              color: #ffffff;
+              background-color: #4caf50;
+              text-align: center;
+            "
+          >
+            Summary of Observation
+          </th>
+          <th
+            style="
+              color: #ffffff;
+              background-color: #4caf50;
+              text-align: center;
+            "
+          >
+            Date
+          </th>
+          <th
+            style="
+              color: #ffffff;
+              background-color: #4caf50;
+              text-align: center;
+            "
+          >
+            Attachments
+          </th>
+        </tr>
+      </thead>
+      <tbody id="emailTableBody">
+        {{ if .Emails }} {{ range .Emails }}
+        <tr>
+          <td>{{ .FromName }}</td>
+          <td>{{ .Subject }}</td>
+          <td>{{ .Date }}</td>
+          <td>{{ .Attachments }}</td>
+          <!-- Placeholder for attachments -->
+        </tr>
+        {{ end }} {{ else }}
+        <tr class="no-records-row">
+          <td colspan="4"><center>No Record Found</center></td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </center>
 
-    <!-- Email Body Modal -->
-    <!-- Bootstrap Email Modal -->
-    <!-- Email Content Modal -->
-    <div class="modal fade" id="emailModal" tabindex="-1" aria-labelledby="emailModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-body">
-                    <div id="modalBodyContent" style="white-space: pre-wrap;"></div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="overlay" class="overlay" onclick="closePopup()"></div>
-    <div id="popup" class="popup">
-        <div id="popup-content"></div>
-    </div><br><br>
-    <div class="row g-2 align-items-center">
-        <div class="col-auto">
-            <a href="/dashboard" class="btn btn-default">BACK</a>
-        </div>
-        <div class="col-auto">
-            <a href="#" class="btn btn-default" data-bs-toggle="modal" data-bs-target="#addptModal">ADD PATIENT</a>
-            <div class="modal fade" id="addptModal" tabindex="-1" aria-labelledby="addptModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="addptModalLabel">Add Patient</h5>
-                            <button
-                              type="button"
-                              class="btn-close"
-                              data-bs-dismiss="modal"
-                              aria-label="Close"
-                            ></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- Mobile Number Input -->
-                            <input
-                              type="text"
-                              id="mobileInput"
-                              class="form-control"
-                              placeholder="Enter 10 Digit Mobile"
-                              maxlength="10"
-                              onkeypress="checkEnter(event)"
-                              autocomplete="off"
-                            />
-
-                            <!-- OTP Input (Initially Hidden) -->
-                            <input
-                              type="text"
-                              id="otpInput"
-                              class="form-control mt-3"
-                              placeholder="Enter OTP"
-                              style="display: none"
-                              maxlength="6"
-                              autocomplete="off"
-                            />
-                            <!-- NEXT Button -->
-                            <button
-                              type="button"
-                              class="btn btn-secondary mt-3"
-                              id="nextButton"
-                              style="
-                                width: 100%;
-                                margin: 25px auto 3%;
-                                box-shadow: 0 3px 9px rgba(0, 0, 0, 0.3);
-                              "
-                              disabled
-                            >
-                              Next
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-auto">
-            <a href="#" class="btn btn-default" data-bs-toggle="modal" data-bs-target="#opdModal">OPD</a>
-            <div class="modal fade" id="opdModal" tabindex="-1" aria-labelledby="opdModalLabel" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-xl">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="opdModalLabel">OPD</h5>
-                            <button
-                              type="button"
-                              class="btn-close"
-                              data-bs-dismiss="modal"
-                              aria-label="Close"
-                            ></button>
-                        </div>
-                        <div class="modal-body">
-                            <ul class="nav nav-tabs" id="opdTabs" role="tablist">
-                                <li class="nav-item">
-                                    <button
-                                  class="nav-link active"
-                                  id="notes-tab"
-                                  data-bs-toggle="tab"
-                                  data-bs-target="#notes"
-                                  type="button"
-                                >
-                                  OPD NOTES
-                                </button>
-                                </li>
-                                <li class="nav-item">
-                                    <button
-                                  class="nav-link"
-                                  id="prescription-tab"
-                                  data-bs-toggle="tab"
-                                  data-bs-target="#prescription"
-                                  type="button"
-                                >
-                                  PRESCRIPTION
-                                </button>
-                                </li>
-                                <li class="nav-item">
-                                    <button
-                                  class="nav-link"
-                                  id="followup-tab"
-                                  data-bs-toggle="tab"
-                                  data-bs-target="#followup"
-                                  type="button"
-                                >
-                                  FOLLOW-UP DATE
-                                </button>
-                                </li>
-                            </ul>
-                            <div class="tab-content" id="opdTabsContent">
-                                <div class="tab-pane fade show active" id="notes">
-                                    <textarea
-                                  class="form-control"
-                                  placeholder="Add OPD Notes"
-                                  rows="5"
-                                ></textarea>
-                                </div>
-                                <div class="tab-pane fade" id="prescription">
-                                    <textarea
-                                  class="form-control"
-                                  placeholder="Add Prescription"
-                                  rows="5"
-                                ></textarea>
-                                </div>
-                                <div class="tab-pane fade" id="followup">
-                                    <div class="mb-3">
-                                        <label for="followupDate" class="form-label"
-                                    >Next Followup Date</label>
-                                        <input
-                                    type="date"
-                                    id="followupDate"
-                                    class="form-control"
-                                    placeholder="Next Followup Date"
-                                  />
-                                        <div class="invalid-feedback">
-                                            Please select a follow-up date.
-                                        </div>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label for="followupTime" class="form-label"
-                                    >Next Followup Time</label>
-                                        <input
-                                    type="time"
-                                    id="followupTime"
-                                    class="form-control"
-                                    placeholder="Next Followup Time"
-                                  />
-                                        <div class="invalid-feedback">
-                                            Please select a follow-up time.
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button
-                              type="button"
-                              class="btn btn-secondary"
-                              onclick="goToPreviousTab()"
-                              style="
-                                color: #4caf50;
-                                background-color: rgba(154, 154, 154, 0.36);
-                              "
-                            >
-                              PREVIOUS
-                            </button>
-                            <button
-                              type="button"
-                              class="btn btn-secondary"
-                              onclick="goToNextTab()"
-                              style="
-                                color: #4caf50;
-                                background-color: rgba(154, 154, 154, 0.36);
-                              "
-                            >
-                              NEXT
-                            </button>
-                            <button
-                              type="submit"
-                              class="btn btn-danger"
-                              id="saveBtn"
-                              style="display: none"
-                              onclick="saveOPDDetails()"
-                            >
-                              SAVE
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- New Warning Modal -->
-            <div class="modal fade" id="warningModal" tabindex="-1" aria-labelledby="warningModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header" style="color: #ffffff; background-color: #4caf50">
-                            <h5 class="modal-title" id="warningModalLabel">Error</h5>
-                            <button
-                              type="button"
-                              class="btn-close"
-                              data-bs-dismiss="modal"
-                            ></button>
-                        </div>
-                        <div class="modal-body fw-bold" id="warningMessage">
-                            <!-- Warning message will be inserted here dynamically -->
-                        </div>
-                        <div class="modal-footer">
-                            <button
-                              type="submit"
-                              class="btn btn-secondary"
-                              data-bs-dismiss="modal"
-                              style="
-                                color: #4caf50;
-                                background-color: rgba(154, 154, 154, 0.36);
-                              "
-                            >
-                              OK
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-auto">
-            <a href="#" class="btn btn-default" data-bs-toggle="modal" data-bs-target="#allrecordModal">VIEW ALL
-                RECORDS</a>
-            <div class="modal fade" id="allrecordModal" tabindex="-1" aria-labelledby="allrecordModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-lx">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="allrecordModalLabel">Allow access to all records permanently
-                            </h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <!-- Mobile Number Input -->
-                            <input type="text" id="phoneInput" class="form-control" placeholder="Enter 10 Digit Mobile" maxlength="10" autocomplete="off">
-
-                            <!-- OTP Input (Initially Hidden) -->
-                            <input type="text" id="OTPInput" class="form-control mt-3" placeholder="Enter OTP"
-                                   style="display: none;" maxlength="6" autocomplete="off">
-                            <!-- NEXT Button -->
-                            <button type="button" class="btn btn-secondary mt-4" id="nextBtn"
-                                    style="width: 100%; margin: 25px auto 3%; box-shadow: 0 3px 9px rgba(0, 0, 0, 0.3);" onclick="showOtpInput()">Next</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div><br><br><br>
+ <!-- Email Content Modal -->
+<div id="emailModal">
+  <div style="background: white; margin: 5% auto; padding: 20px; width: 70%; border-radius: 12px; position: relative; max-height: 80%; overflow-y: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+      <span onclick="closeEmailModal()" style="position: absolute; top: 10px; right: 15px; cursor: pointer; font-size: 28px; color: #333;">&times;</span>
+      
+      <div id="emailModalBody">⏳ Loading...</div>
+      
+      <div style="text-align: right; margin-top: 20px;">
+          <button onclick="closeEmailModal()" class="closemodal">OK</button>
+      </div>
+  </div>
 </div>
+<div id="overlay" class="overlay" onclick="closePopup()"></div>
+  <div id="popup" class="popup">
+    <div id="popup-content"></div>
+  </div>
+  <br /><br />
+  <div class="row g-2 align-items-center">
+    <div class="col-auto">
+      <a href="/dashboard" class="btn btn-default">BACK</a>
+    </div>
+    <div class="col-auto">
+      <a href="#"
+        class="btn btn-default"
+        data-bs-toggle="modal"
+        data-bs-target="#addptModal"
+        >ADD PATIENT</a
+      >
+      <div class="modal fade"
+        id="addptModal"
+        tabindex="-1"
+        aria-labelledby="addptModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addptModalLabel">Add Patient</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <!-- Mobile Number Input -->
+              <input
+                type="text"
+                id="mobileInput"
+                class="form-control"
+                placeholder="Enter 10 Digit Mobile"
+                maxlength="10"
+                onkeypress="checkEnter(event)"
+                autocomplete="off"
+              />
+
+              <!-- OTP Input (Initially Hidden) -->
+              <input
+                type="text"
+                id="otpInput"
+                class="form-control mt-3"
+                placeholder="Enter OTP"
+                style="display: none"
+                maxlength="6"
+                autocomplete="off"
+              />
+              <!-- NEXT Button -->
+              <button
+                type="button"
+                class="btn btn-secondary mt-3"
+                id="nextButton"
+                style="
+                  width: 100%;
+                  margin: 25px auto 3%;
+                  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.3);
+                "
+                disabled
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-auto">
+      <a
+      href="javascript:void(0);"
+      class="btn btn-default"
+     
+      data-patient-id="1"
+       rev="opd-link"
+    >
+      OPD
+    </a>
+    <div
+  class="modal fade"
+  id="opdMessageModal"
+  tabindex="-1"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body text-center">
+        <p id="opdMessageText" style="font-size: 18px; margin: 20px 0;"></p>
+        <div class="d-flex justify-content-end">
+          <button
+            type="button"
+            class="btn"
+           style="all: unset; color: red; cursor: pointer; font-size: 16px; "
+  data-bs-dismiss="modal"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+      <div
+        class="modal fade"
+        id="opdModal"
+        tabindex="-1"
+        aria-labelledby="opdModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="opdModalLabel">OPD</h5>
+              <span id="patientMobile" style="font-size: 1.25rem; color: #212529; margin-left: 10px;"></span>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <ul class="nav nav-tabs" id="opdTabs" role="tablist">
+                <li class="nav-item">
+                  <button
+                    class="nav-link border-top border-end border-start"
+                    id="notes-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#notes"
+                    type="button"
+                    style="color: #ff4081;"
+                  >
+                    OPD NOTES
+                  </button>
+                </li>
+                <li class="nav-item">
+                  <button
+                    class="nav-link border-top border-end border-start"
+                    id="prescription-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#prescription"
+                    type="button"
+                    style="color: #ff4081;"
+                  >
+                    PRESCRIPTION
+                  </button>
+                </li>
+                <li class="nav-item">
+                  <button
+                    class="nav-link border-top border-end border-start"
+                    id="followup-tab"
+                    data-bs-toggle="tab"
+                    data-bs-target="#followup"
+                    type="button"
+                     style="color: #ff4081;"
+                  >
+                    FOLLOW-UP DATE
+                  </button>
+                </li>
+              </ul>
+              <div class="tab-content" id="opdTabsContent">
+                <div class="tab-pane fade show active" id="notes">
+                  <textarea
+                    class="form-control"
+                    placeholder="Add OPD Notes"
+                    rows="5"
+                  ></textarea>
+                </div>
+                <div class="tab-pane fade" id="prescription">
+                  <textarea
+                    class="form-control"
+                    placeholder="Add Prescription"
+                    rows="5"
+                  ></textarea>
+                </div>
+                <div class="tab-pane fade" id="followup">
+                  <div class="mb-3">
+                    <label for="followupDate" class="form-label"
+                      >Next Followup Date</label
+                    >
+                    <input
+                      type="date"
+                      id="followupDate"
+                      class="form-control"
+                      placeholder="Next Followup Date"
+                    />
+                    <div class="invalid-feedback">
+                      Please select a follow-up date.
+                    </div>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="followupTime" class="form-label"
+                      >Next Followup Time</label
+                    >
+                    <input
+                      type="time"
+                      id="followupTime"
+                      class="form-control"
+                      placeholder="Next Followup Time"
+                    />
+                    <div class="invalid-feedback">
+                      Please select a follow-up time.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="goToPreviousTab()"
+                style="
+                  color: #4caf50;
+                  background-color: rgba(154, 154, 154, 0.36);
+                "
+              >
+                PREVIOUS
+              </button>
+              <button
+                type="button"
+                class="btn btn-secondary"
+                onclick="goToNextTab()"
+                style="
+                  color: #4caf50;
+                  background-color: rgba(154, 154, 154, 0.36);
+                "
+              >
+                NEXT
+              </button>
+              <button
+                type="submit"
+                class="btn btn-danger"
+                id="saveBtn"
+                style="display: none"
+                onclick="saveOPDDetails()"
+              >
+                SAVE
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Warning Modal -->
+      <div
+        class="modal fade"
+        id="warningModal"
+        tabindex="-1"
+        aria-labelledby="warningModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div
+              class="modal-header"
+              style="color: #ffffff; background-color: #4caf50"
+            >
+              <h5 class="modal-title" id="warningModalLabel">Error</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+              ></button>
+            </div>
+            <div class="modal-body fw-bold" id="warningMessage">
+              <!-- Warning message will be inserted here dynamically -->
+            </div>
+            <div class="modal-footer">
+              <button
+                type="submit"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+                style="
+                  color: #4caf50;
+                  background-color: rgba(154, 154, 154, 0.36);
+                "
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-auto">
+      <a
+        href="#"
+        class="btn btn-default"
+        data-bs-toggle="modal"
+        data-bs-target="#allrecordModal"
+        >VIEW ALL RECORDS</a
+      >
+      <div
+        class="modal fade"
+        id="allrecordModal"
+        tabindex="-1"
+        aria-labelledby="allrecordModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered modal-lx">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="allrecordModalLabel">
+                Allow access to all records permanently
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <!-- Mobile Number Input -->
+              <input
+                type="text"
+                id="phoneInput"
+                class="form-control"
+                placeholder="Enter 10 Digit Mobile"
+                maxlength="10"
+                autocomplete="off"
+              />
+
+              <!-- OTP Input (Initially Hidden) -->
+              <input
+                type="text"
+                id="OTPInput"
+                class="form-control mt-3"
+                placeholder="Enter OTP"
+                style="display: none"
+                maxlength="6"
+                autocomplete="off"
+              />
+              <!-- NEXT Button -->
+              <button
+                type="button"
+                class="btn btn-secondary mt-4"
+                id="nextBtn"
+                style="
+                  width: 100%;
+                  margin: 25px auto 3%;
+                  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.3);
+                "
+                onclick="showOtpInput()"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br /><br /><br />
+</div>
+
+
 <script>
-    // Show a loading message while fetching
-        function showLoadingMessage() {
-            document.getElementById("emailTableBody").innerHTML = "<tr><td colspan='4'>Loading...</td></tr>";
-        }
-        
-        // Show an error message
-        function showError(msg) {
-            document.getElementById("emailTableBody").innerHTML = `<tr><td colspan='4' style='color: red;'>${msg}</td></tr>`;
-        }
-                
-        function logout() {
-          fetch('/logout', { method: 'GET' })
-              .then(response => {
-                  if (response.redirected) {
-                      window.location.href = response.url; // Redirect to login page
-                  }
-              })
-              .catch(error => console.error('Logout failed:', error));
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    let today = new Date().toISOString().split("T")[0];
+    document.getElementById("followupDate").setAttribute("min", today);
+  });
+ // PDF Generation call on button click
+// Function to call PDF generation
+function generatePDF() {
+  const dropdown = document.getElementById("toFilter");
+  const selectedValue = dropdown.value;
+
+  if (!selectedValue) {
+    alert("Please select a patient.");
+    return;
+  }
+
+  // Extract only the mobile number part
+  const mobileNumber = selectedValue.split("@")[0];
+
+  fetch("/generate-pdf", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ patientEmail: mobileNumber }), // send only mobile number
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.message) {
+        alert("✅ " + data.message);
+      } else {
+        alert("❌ Error: " + data.error);
       }
-    
-      document.addEventListener("DOMContentLoaded", function () {
-        // Fetch recipients and populate the dropdown
-        fetch("/get-recipients")
-            .then(response => response.json())
-            .then(data => {
-                let dropdown = document.getElementById("toFilter");
-                dropdown.innerHTML = '<option value="">Select Patient</option>'; // Reset options
-    
-                data.forEach(email => {
-                    let option = document.createElement("option");
-                    option.value = email;
-                    option.textContent = email;
+    })
+    .catch((error) => {
+      console.error("PDF generation failed:", error);
+      alert("❌ PDF generation request failed.");
+    });
+}
+
+
+  // Show a loading message while fetching
+  function showLoadingMessage() {
+    document.getElementById("emailTableBody").innerHTML = `
+        <tr>
+            <td colspan='4' class="text-center">
+                <div class="spinner-border text-dark" role="status">
+  <span class="sr-only">Loading...</span>
+</div>
+            </td>
+        </tr>
+    `;
+  }
+
+  // Show an error message
+  function showError(msg) {
+    document.getElementById(
+      "emailTableBody"
+    ).innerHTML = `<tr><td colspan='4' style='color: red;'>${msg}</td></tr>`;
+  }
+
+  function logout() {
+    fetch("/logout", { method: "GET" })
+      .then((response) => {
+        if (response.redirected) {
+          window.location.href = response.url; // Redirect to login page
+        }
+      })
+      .catch((error) => console.error("Logout failed:", error));
+  }
+  
+  document.addEventListener("DOMContentLoaded", function () {
+    const dropdown = document.getElementById("toFilter");
+    const modalTitle = document.getElementById("opdModalLabel");
+
+    // Fetch email recipients
+    fetch("/get-recipients")
+    .then((response) => {
+        if (!response.ok) {
+            // If the response has a status code indicating an error, throw an error
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then((data) => {
+        // Initialize the dropdown with a default option
+        dropdown.innerHTML = '<option value="">Select Patient</option>';
+
+        // Use a Set to store unique email addresses
+        const uniqueEmails = new Set();
+
+        data.forEach((email) => {
+            // Check if the email is valid and contains the '@' symbol
+            if (email && email.includes("@")) {
+                // Trim any leading or trailing whitespace from the email
+                const fullEmail = email.trim();
+
+                // Add the email to the Set if it's not already present
+                if (!uniqueEmails.has(fullEmail)) {
+                    uniqueEmails.add(fullEmail);
+
+                    // Create a new option element for the dropdown
+                    const option = document.createElement("option");
+                    option.value = fullEmail; // Set the option's value to the full email
+                    option.textContent = fullEmail; // Display the full email in the dropdown
+
+                    // Append the option to the dropdown
                     dropdown.appendChild(option);
-                });
-            })
-            .catch(error => console.error("❌ Error fetching recipients:", error));
+                }
+            }
+        });
+    })
+    .catch((error) => {
+        console.error("Error fetching recipients:", error);
+        alert("Your session has expired. Please log in again.");
+        window.location.href = "/login"; // Redirect to the login page
     });
+
+
+    // Update modal title based on the selected email
+    dropdown.addEventListener("change", function () {
+        const selectedEmail = dropdown.value;
+        modalTitle.textContent = selectedEmail ? `OPD - ${selectedEmail}` : "OPD";
+
+        if (selectedEmail) {
+            filterEmails();
+        } else {
+            document.getElementById("emailTableBody").innerHTML =
+                '<tr><td colspan="4"><center>No Record Found</center></td></tr>';
+        }
+    });
+
+
+
+
+  
+    // ✅ OPD button click handler
+    document.querySelectorAll('a[rev="opd-link"]').forEach(function (opdBtn) {
+      opdBtn.addEventListener("click", function () {
+        const selectedPatient = dropdown.value;
+        if (!selectedPatient) {
+          // Set modal message text
+          document.getElementById("opdMessageText").textContent =
+            "Please Select Patient to proceed further.";
+  
+          // Show message modal
+          const messageModal = new bootstrap.Modal(document.getElementById("opdMessageModal"));
+          messageModal.show();
+          return;
+        }
+  
+        // Open OPD modal if patient selected
+        const opdModal = new bootstrap.Modal(document.getElementById("opdModal"));
+        opdModal.show();
+      });
+    });
+  });
     
-    // Redirect on patient selection
-    document.getElementById("toFilter").addEventListener("change", function () {
-        filterEmails(); // ✅ Calls filterEmails() instead of reloading the page
+  var loggedInEmail = "{{.Email}}";
+  
+  
+  function filterEmails() {
+    var selectedTo = document.getElementById("toFilter").value;
+    var tableBody = document.getElementById("emailTableBody");
+
+    if (!selectedTo) {
+        tableBody.innerHTML =
+            '<tr class="no-records-row"><td colspan="4">Please select a patient.</td></tr>';
+        return;
+    }
+
+    tableBody.innerHTML =
+        '<tr class="no-records-row"><td colspan="4">Loading...</td></tr>';
+
+    var params = new URLSearchParams({
+        to: selectedTo,
+        from: loggedInEmail // Using the embedded variable
     });
-   
-    function filterEmails() {
-        var selectedTo = document.getElementById("toFilter").value;
-        var tableBody = document.getElementById("emailTableBody");
-        // Show loading state
-        tableBody.innerHTML = '<tr class="no-records-row"><td colspan="4">Loading...</td></tr>';
-        if (!selectedTo) {
-            tableBody.innerHTML = '<tr class="no-records-row"><td colspan="4">No emails found</td></tr>';
+
+    fetch(`/emails?${params.toString()}`, {
+        headers: { "X-Requested-With": "XMLHttpRequest" },
+    })
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then((data) => {
+        console.log("✅ API Response:", data);
+
+        if (!data.emails || !Array.isArray(data.emails) || data.emails.length === 0) {
+            tableBody.innerHTML =
+                '<tr class="no-records-row"><td colspan="4">No records to display.</td></tr>';
             return;
         }
-        fetch(`/emails?to=${encodeURIComponent(selectedTo)}`, {
-            headers: { "X-Requested-With": "XMLHttpRequest" } // Identifies as AJAX request
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            return response.json();
-        })
+
+        tableBody.innerHTML = "";
+        const filteredEmails = data.emails.filter(email => email.from === loggedInEmail);
+
+        if (filteredEmails.length === 0) {
+            tableBody.innerHTML =
+                '<tr class="no-records-row"><td colspan="4">No matching records found.</td></tr>';
+            return;
+        }
+
+        filteredEmails.forEach((email) => {
+            let fromName = email.from_name || "Unknown";
+            let subject = email.subject || "(No Subject)";
+            subject = `<a href="javascript:void(0);" onclick="fetchAndShowEmailBody('${email.uid}')" style="color: red; text-decoration: none; cursor: pointer;">${subject}</a>`;
+            let date = email.date || "No Date";
+
+            let attachments = (email.attachment_names || [])
+                .map(
+                    (name) =>
+                        `<a href="javascript:void(0);" onclick="renderAttachments(${email.uid}, '${name}')" style="color: red; text-decoration: none; cursor: pointer;">${name}</a>`
+                )
+                .join(", ") || "No Attachments";
+
+            let row = `<tr class="email-row">
+                            <td>${fromName}</td>
+                            <td>${subject}</td>
+                            <td>${date}</td>
+                            <td>${attachments}</td>
+                        </tr>`;
+            tableBody.innerHTML += row;
+        });
+    })
+    .catch((err) => {
+        console.error(err);
+        alert("Your session has expired. Please log in again.");
+        window.location.href = "/login"; // Redirect to the login page
+    });
+}
+
+  function fetchAndShowEmailBody(uid) {
+    document.getElementById("emailModalBody").innerHTML = "<p>⏳ Loading...</p>";
+    document.getElementById("emailModal").style.display = "block";
+
+    fetch(`/get-email-body?uid=${uid}`)
+        .then(response => response.json())
         .then(data => {
-            console.log("✅ API Response:", data);
-    
-            if (!data.emails || !Array.isArray(data.emails) || data.emails.length === 0) {
-                tableBody.innerHTML = '<tr class="no-records-row"><td colspan="4">No records to display.</td></tr>';
+            console.log("Fetched email data:", data);
+            if (data.error) {
+                document.getElementById("emailModalBody").innerHTML = `<p style="color:red;">${data.error}</p>`;
                 return;
             }
-            tableBody.innerHTML = ""; // Clear existing rows
-            data.emails.forEach(email => {
-                let fromName = email.from_name || "Unknown";
-                let subject = email.subject ? email.subject.replace(/"/g, '&quot;') : "(No Subject)";
-                let date = email.date || "No Date";
-                let body = email.body ? email.body.replace(/"/g, '&quot;') : "No Content";
-                let attachments = email.attachments && email.attachments.length > 0
-                ? email.attachments.map(a => 
-                    `<a class="attachment" href="attachments/${encodeURIComponent(a.filename)}" 
-                        target="_blank" rel="noopener noreferrer"
-                        onclick="window.open(this.href, '_blank'); return false;"
-                        style="color: red; text-decoration: none; cursor: pointer;"
-                        onmouseover="this.style.textDecoration='underline'" 
-                        onmouseout="this.style.textDecoration='none'">
-                        ${a.filename}
-                    </a>`).join('<br>') 
-                : "No Attachments";
-                let row = `<tr class="email-row">
-                    <td>${fromName}</td>
-    
-                    <!-- Subject Column (Clickable, Opens Modal) -->
-                    <td>
-                        <a href="javascript:void(0);" 
-                           onclick="openEmailModal(this)" 
-                           data-body="${body}" 
-                           data-attachments="${email.attachments ? email.attachments.map(a => a.filename + '|' + a.mimeType).join(';') : ''}"
-                           style="color: red; text-decoration: none; cursor: pointer;"
-                           onmouseover="this.style.textDecoration='underline'" 
-                           onmouseout="this.style.textDecoration='none'">
-                            ${subject}
-                        </a>
-                    </td>
-                    <td>${date}</td>
-                    <!-- Attachments Column -->
-                    <td>${attachments}</td>
-                </tr>`;
-                tableBody.innerHTML += row;
-            });
-            if (data.emails.length === 0) {
-                tableBody.innerHTML = '<tr class="no-records-row"><td colspan="4">No emails found.</td></tr>';
+
+            let bodyContent = (data.plainTextBody || "")
+                .replace(/\r\n/g, "<br>")
+                .replace(/\n/g, "<br>")
+                // remove multiple consecutive <br> lines (2 or more)
+                .replace(/(<br\s*\/?>\s*){2,}/g, "<br>")
+                .trim();
+
+            let attachmentsHtml = "";
+
+            if (data.attachments && data.attachments.length > 0) {
+                data.attachments.forEach(att => {
+                    if (att.type === "image") {
+                        attachmentsHtml += `<img src="${att.base64}" alt="${att.name}" style="max-width: 300px; margin: 10px 0;"><br>`;
+                    }
+                });
             }
+
+            document.getElementById("emailModalBody").innerHTML = bodyContent + attachmentsHtml;
         })
-        .catch(error => {
-            console.error("❌ Error fetching emails:", error);
-            document.getElementById("emailTableBody").innerHTML = 
-                '<tr class="no-records-row"><td colspan="4">Failed to load emails.</td></tr>';
+        .catch(err => {
+            <!-- document.getElementById("emailModalBody").innerHTML = `<p style="color:red;">Error: ${err.message}</p>`; -->
+            alert("Your session has expired. Please log in again.");
+            window.location.href = "/login"; // Redirect to the login page
         });
+}
+
+
+
+
+function closeEmailModal() {
+    document.getElementById("emailModal").style.display = "none";
+}
+function renderAttachments(uid, attachmentName) {
+  // Validate input parameters
+  if (!uid || !attachmentName) {
+      alert("Invalid user ID or attachment name.");
+      return;
+  }
+
+  // Construct the URL for fetching the attachment
+  const url = `/get-attachment?uid=${encodeURIComponent(uid)}&attachmentName=${encodeURIComponent(attachmentName)}`;
+
+  // Attempt to open a new tab immediately in response to the user action
+  const newTab = window.open("", "_blank");
+  if (!newTab) {
+      alert("Popup blocked! Please allow popups for this website.");
+      return;
+  }
+  newTab.document.write("<h3>Loading attachment...</h3>");
+  newTab.document.title = "Loading...";
+
+  // Fetch the attachment
+  fetch(url)
+      .then(response => {
+          if (!response.ok) {
+              // Handle specific HTTP errors
+              if (response.status === 401) {
+                  throw new Error("Session expired");
+              } else if (response.status === 404) {
+                  throw new Error("Attachment not found");
+              } else {
+                  throw new Error(`Error: ${response.status} ${response.statusText}`);
+              }
+          }
+          return response.blob();
+      })
+      .then(blob => {
+          const fileUrl = URL.createObjectURL(blob);
+          const fileType = blob.type;
+
+          newTab.document.open();
+          newTab.document.title = attachmentName;
+
+          if (fileType.startsWith('image/')) {
+              // Display image directly
+              newTab.document.write(`
+                  <html>
+                  <head><title>${attachmentName}</title></head>
+                  <body>
+                      <h3>${attachmentName}</h3>
+                      <img src="${fileUrl}" style="max-width: 100%; height: auto;" />
+                  </body>
+                  </html>
+              `);
+          } else if (fileType === 'application/pdf') {
+              // Embed PDF in an iframe
+              newTab.document.write(`
+                  <html>
+                  <head><title>${attachmentName}</title></head>
+                  <body>
+                      <iframe src="${fileUrl}" width="100%" height="100%" style="border:none; height: 95vh;"></iframe>
+                  </body>
+                  </html>
+              `);
+          } else {
+              // For other file types, provide a download link
+              newTab.document.write(`
+                  <html>
+                  <head><title>${attachmentName}</title></head>
+                  <body>
+                      <h3>Download attachment:</h3>
+                      <a href="${fileUrl}" download="${attachmentName}">${attachmentName}</a>
+                  </body>
+                  </html>
+              `);
+          }
+          newTab.document.close();
+      })
+      .catch(err => {
+          newTab.close(); // Close the new tab on error
+          if (err.message === "Session expired") {
+              alert("Your session has expired. Please log in again.");
+              window.location.href = "/login"; // Redirect to the login page
+          } else if (err.message === "Attachment not found") {
+              alert("The requested attachment could not be found.");
+          } else {
+              alert(err.message);
+          }
+      });
+}
+
+function downloadAttachment(emailID, attachmentName) {
+    if (!emailID || emailID === "0") {
+        alert("Invalid email ID");
+        return;
     }
-    
-    function openEmailModal(element) {
-        var emailBody = element.getAttribute("data-body") || "(No body available)";
-        var attachmentsData = element.getAttribute("data-attachments");
-        var modalBody = document.getElementById("modalBodyContent");
-        modalBody.innerHTML = "<p>" + emailBody + "</p>"; // Display email body first
-        if (attachmentsData && attachmentsData.trim() !== "") {
-            var attachmentsArray = attachmentsData.split(";").filter(item => item.trim() !== "");
-            if (attachmentsArray.length > 0) {
-                var attachmentHTML = "<h5>Attachments:</h5>";
-                attachmentsArray.forEach(function (item) {
-                    var parts = item.split("|");
-                    if (parts.length < 2) return; // Skip if MIME type is missing
-                    var filename = parts[0].trim();
-                    var mimeType = parts[1].trim();
-                    var filePath = "/static/attachments/" + encodeURIComponent(filename);
-                    attachmentHTML += `<div style="margin-bottom: 10px;">
+  
+     const url = `/get-attachment?uid=${uid}&attachmentName=${encodeURIComponent(attachmentName)}`;
+
+    window.open(url, '_blank'); 
+}
+
+  function openEmailModal(element) {
+    var emailBody = element.getAttribute("data-body") || "(No body available)";
+    var attachmentsData = element.getAttribute("data-attachments");
+    var modalBody = document.getElementById("modalBodyContent");
+    modalBody.innerHTML = "<p>" + emailBody + "</p>"; // Display email body first
+    if (attachmentsData && attachmentsData.trim() !== "") {
+      var attachmentsArray = attachmentsData
+        .split(";")
+        .filter((item) => item.trim() !== "");
+      if (attachmentsArray.length > 0) {
+        //var attachmentHTML = "<h5>Attachments:</h5>";
+        attachmentsArray.forEach(function (item) {
+          var parts = item.split("|");
+          if (parts.length < 2) return; // Skip if MIME type is missing
+          var filename = parts[0].trim();
+          var mimeType = parts[1].trim();
+          var filePath = "attachments/" + encodeURIComponent(filename);
+          attachmentHTML += `<div style="margin-bottom: 10px;">
                         <span style="font-weight: bold;">⬇ 
                             <a href="${filePath}" target="_blank" style="text-decoration: none; color: blue;">${filename}</a>
                         </span><br>`;
-                    if (mimeType.startsWith("image/")) {
-                        // Show image inline & clickable link
-                        attachmentHTML += `<a href="${filePath}" target="_blank">
+          if (mimeType.startsWith("image/")) {
+            // Show image inline & clickable link
+            attachmentHTML += `<a href="${filePath}" target="_blank">
                             <img src="${filePath}" alt="${filename}" 
                                 style="max-width: 100%; height: auto; display: block; margin-top: 5px; 
                                 border: 1px solid #ccc; padding: 5px;">
                         </a>`;
-                    } else if (mimeType === "application/pdf") {
+          } /*else if (mimeType === "application/pdf") {
                         // Provide a link for PDFs
                         attachmentHTML += `<a href="${filePath}" target="_blank" style="font-weight: bold;">(Open PDF)</a>`;
                     } else {
                         // Download link for other file types
-                    }
-                    attachmentHTML += `</div>`; // Close div for spacing
-                });
-                modalBody.innerHTML += attachmentHTML;
-            }
-        }
-        var modal = new bootstrap.Modal(document.getElementById('emailModal'));
+                    }*/
+          attachmentHTML += `</div>`; // Close div for spacing
+        });
+        var modal = new bootstrap.Modal(document.getElementById("emailModal"));
         modal.show();
+      }
     }
-    
-        // Function to decode HTML entities
-        function decodeHtml(html) {
-            var txt = document.createElement("textarea");
-            txt.innerHTML = html;
-            return txt.value;
+  }
+  // Function to decode HTML entities
+  function decodeHtml(html) {
+    var txt = document.createElement("textarea");
+    txt.innerHTML = html;
+    return txt.value;
+  }
+  function hasAccessToAllRecords(toEmail, fromEmail, callback) {
+    console.log(fromEmail);
+    $.get(
+      `/api/check-email?from=${fromEmail}&to=${toEmail}`,
+      function (response) {
+        var statusDiv = document.getElementById("email-status");
+        if (response.message.includes("exists")) {
+          statusDiv.innerText = "✅ Email exists in the database";
+          statusDiv.classList.add("exists");
+          statusDiv.classList.remove("not-found");
+          callback(true);
+        } else {
+          statusDiv.innerText = "⚠️ Email not found in database";
+          statusDiv.classList.add("not-found");
+          statusDiv.classList.remove("exists");
+          callback(false);
         }
-        function hasAccessToAllRecords(toEmail, fromEmail, callback) {
-          console.log(fromEmail);
-            $.get(`/api/check-email?from=${fromEmail}&to=${toEmail}`, function(response) {
-                var statusDiv = document.getElementById("email-status");
-                if (response.message.includes("exists")) {
-                  statusDiv.innerText = "✅ Email exists in the database";
-                    statusDiv.classList.add("exists");
-                    statusDiv.classList.remove("not-found");
-                    callback(true);
-                } else {
-                  statusDiv.innerText = "⚠️ Email not found in database";
-                    statusDiv.classList.add("not-found");
-                    statusDiv.classList.remove("exists");
-                    callback(false);
-                }
-            }).fail(function() {
-                console.error("Error calling API");
-                document.getElementById("email-status").innerText = "❌ Error checking database";
-                callback(false);
-            });
-        }
-        function showPopup(body) {
-            document.getElementById("modalBodyContent").innerHTML = body;
-            var emailModal = new bootstrap.Modal(document.getElementById("emailModal"));
-            emailModal.show();
-        }
-        function closePopup() {
-                document.getElementById('popup').style.display = 'none';
-                document.getElementById('overlay').style.display = 'none';
+      }
+    ).fail(function () {
+      console.error("Error calling API");
+      document.getElementById("email-status").innerText =
+        "❌ Error checking database";
+      callback(false);
+    });
+  }
+
+  function showPopup(body) {
+    document.getElementById("modalBodyContent").innerHTML = body;
+    var emailModal = new bootstrap.Modal(document.getElementById("emailModal"));
+    emailModal.show();
+  }
+  function closePopup() {
+    document.getElementById("popup").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+  }
+  let fromName = "{{.FromName}}";  // Injected from controller
+  function saveOPDDetails() {
+    let mobileNumber = document.getElementById("toFilter").value;
+    let opdNotes = document.querySelector("#notes textarea").value.trim();
+    let prescription = document.querySelector("#prescription textarea").value.trim();
+    let followupDateEl = document.getElementById("followupDate");
+    let followupTimeEl = document.getElementById("followupTime");
+    let followupDate = followupDateEl.value.trim();
+    let followupTime = followupTimeEl.value.trim();
+
+    let currentDateTime = new Date().toLocaleString("en-GB", {  
+        day: "2-digit",  
+        month: "short",  
+        year: "numeric",  
+        hour: "2-digit",  
+        minute: "2-digit",  
+        hour12: true  
+    }).replace(",", "");
+
+    // Reset validation styles
+    followupDateEl.classList.remove("is-invalid");
+    followupTimeEl.classList.remove("is-invalid");
+
+    // Validate required fields
+    let isValid = true;
+    if (!followupDate) {
+        followupDateEl.classList.add("is-invalid");
+        isValid = false;
+    }
+    if (!followupTime) {
+        followupTimeEl.classList.add("is-invalid");
+        isValid = false;
+    }
+
+    // 🔴 IMPORTANT: Stop if validation fails — do not send request!
+    if (!isValid) {
+        alert("⚠️ Please fill Follow-up Date and Follow-up Time before generating PDF.");
+        return;
+    }
+
+    // Proceed with fetch if all fields are valid
+    fetch("/generate-pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            mobile: mobileNumber.split('@')[0],
+            opdNotes: opdNotes,
+            prescription: prescription,
+            followupDate: followupDate,
+            followupTime: followupTime,
+            doctorName: fromName,
+            generatedDateTime: currentDateTime
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            console.log("PDF not generated:", data.error);
+            alert("❌ Error: " + data.error);
+            return;
         }
 
-        function saveOPDDetails() {
-                let followupDate = document.querySelector("#followupDate");
-                let followupTime = document.querySelector("#followupTime");
-                
-                let isValid = true;
-            
-                // Reset validation classes
-                followupDate.classList.remove("is-invalid", "is-valid");
-                followupTime.classList.remove("is-invalid", "is-valid");
-            
-                // Validate Follow-up Date
-                if (followupDate.value === "") {
-                    followupDate.classList.add("is-invalid");
-                    isValid = false;
-                } else {
-                    followupDate.classList.add("is-valid");
-                }
-            
-                // Validate Follow-up Time
-                if (followupTime.value === "") {
-                    followupTime.classList.add("is-invalid");
-                    isValid = false;
-                } else {
-                    followupTime.classList.add("is-valid");
-                }
+        if (data.message) {
+            alert("✅ PDF generated and sent to Patient email");
+
+            // ✅ Call filterEmails() only after a successful PDF generation
+            filterEmails();
+
+            let opdModal = document.getElementById("opdModal");
+            let modalInstance = bootstrap.Modal.getInstance(opdModal);
+            if (modalInstance) {
+                modalInstance.hide();
+            } else {
+                let newModalInstance = new bootstrap.Modal(opdModal);
+                newModalInstance.hide();
+            }
+        } else {
+            alert("❌ Error: " + data.error);
         }
-        function updateTable(entry) {
-            let table = document.querySelector("table tbody");
-            let row = document.createElement("tr");
-        
-            row.innerHTML = `
+    })
+    .catch(error => console.error("❌ Error generating PDF:", error));
+}
+
+   
+  function updateTable(entry) {
+    let table = document.querySelector("table tbody");
+    let row = document.createElement("tr");
+
+    row.innerHTML = `
                     <td>${entry.doctor}</td>
                     <td><a href="#" onclick="showPopup('${
                       entry.opdNotes
                     }')" style="color: red; text-decoration: none;">${entry.opdNotes.substring(
-              0,
-              30
-            )}...</a></td>
+      0,
+      30
+    )}...</a></td>
                     <td>${entry.followupDate}</td>
                     <td>No attachments</td>
                 `;
-        
-            table.appendChild(row);
+
+    table.appendChild(row);
+  }
+  function checkEnter(event) {
+    let mobileInput = document.getElementById("mobileInput");
+    let otpInput = document.getElementById("otpInput");
+    let nextButton = document.getElementById("nextButton");
+
+    // Check if "Enter" key was pressed
+    if (event.key === "Enter") {
+      // Validate 10-digit mobile number
+      if (/^\d{10}$/.test(mobileInput.value)) {
+        otpInput.style.display = "block"; // Show OTP input
+        nextButton.disabled = false; // Enable Next button
+      } else {
+        alert("Please enter a valid 10-digit mobile number.");
+      }
+    }
+  }
+
+  function showOtpInput() {
+    const mobileInput = document.getElementById("phoneInput");
+    const otpInput = document.getElementById("OTPInput");
+
+    // Validate mobile number (must be 10 digits)
+    const mobileNumber = mobileInput.value.trim();
+    if (/^\d{10}$/.test(mobileNumber)) {
+      otpInput.style.display = "block"; // Show OTP input
+      mobileInput.setAttribute("readonly", true); // Disable editing mobile number
+      document.getElementById("nextBtn").textContent = "Submit"; // Change button text to 'Submit'
+    } else {
+      alert("Please enter a valid 10-digit mobile number");
+    }
+  }
+ /*Shuffling of Tabs*/
+ document.addEventListener("DOMContentLoaded", function () {
+  const tabs = document.querySelectorAll("#opdTabs button");
+  const tabContents = document.querySelectorAll(".tab-pane");
+  const saveBtn = document.getElementById("saveBtn");
+  const nextBtn = document.querySelector(".modal-footer button[onclick='goToNextTab()']");
+  const prevBtn = document.querySelector(".modal-footer button[onclick='goToPreviousTab()']");
+
+  // Disable manual clicking on tabs
+  tabs.forEach(tab => {
+      tab.setAttribute("disabled", "true");
+  });
+
+function updateButtons() {
+  let tabs = document.querySelectorAll("#opdTabs button");
+  let activeTab = document.querySelector(".tab-pane.show.active");
+
+  // Remove active-border class from all buttons
+  tabs.forEach(tab => {
+      tab.classList.remove("active-border");
+  });
+
+  // Highlight the active tab button
+  let activeTabButton = document.querySelector(`#opdTabs button[data-bs-target="#${activeTab.id}"]`);
+  if (activeTabButton) {
+      activeTabButton.classList.add("active-border");
+  }
+
+  // Find index of active tab
+  let tabPanes = document.querySelectorAll(".tab-pane");
+  let activeIndex = Array.from(tabPanes).findIndex(tab => tab.classList.contains("show"));
+
+  // Show/hide buttons correctly
+  prevBtn.style.display = activeIndex === 0 ? "none" : "inline-block";
+  nextBtn.style.display = activeIndex === tabPanes.length - 1 ? "none" : "inline-block";
+  saveBtn.style.display = activeIndex === tabPanes.length - 1 ? "inline-block" : "none"; // Fix SAVE button issue
+}
+
+  function showWarningModal(message) {
+      document.getElementById("warningMessage").innerHTML = " " + message;
+      new bootstrap.Modal(document.getElementById("warningModal")).show();
+  }
+
+  function validateCurrentTab() {
+      let activeTab = document.querySelector(".tab-pane.show.active");
+      let isValid = true;
+
+      if (activeTab.id === "notes") {
+          let opdNotes = document.querySelector("#notes textarea").value.trim();
+          if (opdNotes === "") {
+              showWarningModal("OPD Notes cannot be empty.");
+              isValid = false;
           }
-          function checkEnter(event) {
-            let mobileInput = document.getElementById("mobileInput");
-            let otpInput = document.getElementById("otpInput");
-            let nextButton = document.getElementById("nextButton");
-        
-            // Check if "Enter" key was pressed
-            if (event.key === "Enter") {
-              // Validate 10-digit mobile number
-              if (/^\d{10}$/.test(mobileInput.value)) {
-                otpInput.style.display = "block"; // Show OTP input
-                nextButton.disabled = false; // Enable Next button
-              } else {
-                alert("Please enter a valid 10-digit mobile number.");
-              }
-            }
+      } else if (activeTab.id === "prescription") {
+          let prescription = document.querySelector("#prescription textarea").value.trim();
+          if (prescription === "") {
+              showWarningModal("Prescription cannot be empty.");
+              isValid = false;
           }
-        
-          function showOtpInput() {
-            const mobileInput = document.getElementById("phoneInput");
-            const otpInput = document.getElementById("OTPInput");
-        
-            // Validate mobile number (must be 10 digits)
-            const mobileNumber = mobileInput.value.trim();
-            if (/^\d{10}$/.test(mobileNumber)) {
-              otpInput.style.display = "block"; // Show OTP input
-              mobileInput.setAttribute("readonly", true); // Disable editing mobile number
-              document.getElementById("nextBtn").textContent = "Submit"; // Change button text to 'Submit'
-            } else {
-              alert("Please enter a valid 10-digit mobile number");
-            }
+      } else if (activeTab.id === "followup") {
+          let followupDate = document.querySelector("#followup input[type='date']").value;
+          let followupTime = document.querySelector("#followup input[type='time']").value;
+          if (followupDate === "" || followupTime === "") {
+              showWarningModal("Please select both Follow-up Date and Time.");
+              isValid = false;
           }
-          document.addEventListener("DOMContentLoaded", function () {
-            const tabs = document.querySelectorAll("#opdTabs button");
-            const saveBtn = document.getElementById("saveBtn");
-            const nextBtn = document.querySelector(
-              ".modal-footer button[onclick='goToNextTab()']"
-            );
-            const prevBtn = document.querySelector(
-              ".modal-footer button[onclick='goToPreviousTab()']"
-            );
-        
-            function updateButtons() {
-              let activeIndex = Array.from(tabs).findIndex((tab) =>
-                tab.classList.contains("active")
-              );
-              prevBtn.style.display = activeIndex === 0 ? "none" : "inline-block";
-              nextBtn.style.display =
-                activeIndex === tabs.length - 1 ? "none" : "inline-block";
-              saveBtn.style.display =
-                activeIndex === tabs.length - 1 ? "inline-block" : "none";
-            }
-        
-            function showWarningModal(message) {
-              document.getElementById("warningMessage").innerHTML = " " + message;
-              new bootstrap.Modal(document.getElementById("warningModal")).show();
-            }
-        
-            function validateCurrentTab() {
-              let activeTabId = document.querySelector(".tab-pane.active").id;
-              let isValid = true;
-        
-              if (activeTabId === "notes") {
-                let opdNotes = document.querySelector("#notes textarea").value.trim();
-                if (opdNotes === "") {
-                  showWarningModal("OPD Notes cannot be empty.");
-                  isValid = false;
-                }
-              } else if (activeTabId === "prescription") {
-                let prescription = document
-                  .querySelector("#prescription textarea")
-                  .value.trim();
-                if (prescription === "") {
-                  showWarningModal("Prescription cannot be empty.");
-                  isValid = false;
-                }
-              } else if (activeTabId === "followup") {
-                let followupDate = document.querySelector(
-                  "#followup input[type='date']"
-                ).value;
-                let followupTime = document.querySelector(
-                  "#followup input[type='time']"
-                ).value;
-                if (followupDate === "" || followupTime === "") {
-                  showWarningModal("Please select both Follow-up Date and Time.");
-                  isValid = false;
-                }
-              }
-        
-              return isValid;
-            }
-        
-            window.goToNextTab = function () {
-              if (!validateCurrentTab()) return; // Stop navigation if validation fails
-        
-              let activeIndex = Array.from(tabs).findIndex((tab) =>
-                tab.classList.contains("active")
-              );
-              if (activeIndex < tabs.length - 1) {
-                tabs[activeIndex + 1].click();
-              }
-              updateButtons();
-            };
-        
-            window.goToPreviousTab = function () {
-              let activeIndex = Array.from(tabs).findIndex((tab) =>
-                tab.classList.contains("active")
-              );
-              if (activeIndex > 0) {
-                tabs[activeIndex - 1].click();
-              }
-              updateButtons();
-            };
-        
-            tabs.forEach((tab) => {
-              tab.addEventListener("click", updateButtons);
-            });
-        
-            updateButtons(); // Initial call
-          });
+      }
+      return isValid;
+  }
+
+  window.goToNextTab = function () {
+      if (!validateCurrentTab()) return;
+
+      let activeIndex = Array.from(tabContents).findIndex(tab => tab.classList.contains("show", "active"));
+      if (activeIndex < tabContents.length - 1) {
+          tabContents[activeIndex].classList.remove("show", "active");
+          tabContents[activeIndex + 1].classList.add("show", "active");
+      }
+      updateButtons();
+  };
+
+  window.goToPreviousTab = function () {
+      let activeIndex = Array.from(tabContents).findIndex(tab => tab.classList.contains("show", "active"));
+      if (activeIndex > 0) {
+          tabContents[activeIndex].classList.remove("show", "active");
+          tabContents[activeIndex - 1].classList.add("show", "active");
+      }
+      updateButtons();
+  };
+
+  updateButtons();
+});
+
+
+
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
-    integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous">
-</script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
-    integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous">
-</script>
+<script
+  src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+  integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+  crossorigin="anonymous"
+></script>
+<script
+  src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js"
+  integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
+  crossorigin="anonymous"
+></script>
 {{template "footer" .}}
