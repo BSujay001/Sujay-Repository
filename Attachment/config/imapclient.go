@@ -6,79 +6,71 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/emersion/go-imap/client"
 )
 
-// ConnectIMAP establishes an IMAP connection using environment variables
+// ConnectIMAP establishes an IMAP connection and tracks execution time
 func ConnectIMAP() (*client.Client, error) {
+	startTime := time.Now()
+
 	// ✅ Load IMAP configuration from environment variables
 	imapServer := os.Getenv("IMAP_SERVER")
 	username := os.Getenv("EMAIL_USERNAME")
 	password := os.Getenv("EMAIL_PASSWORD")
 
-	// ✅ Validate environment variables
 	if imapServer == "" || username == "" || password == "" {
-		log.Println("❌ Missing IMAP configuration. Check environment variables.")
-		return nil, fmt.Errorf("IMAP_SERVER, EMAIL_USERNAME, or EMAIL_PASSWORD is not set")
+		return nil, fmt.Errorf("❌ Missing IMAP configuration. Check environment variables")
 	}
 
-	// ✅ Split IMAP server and port
 	parts := strings.Split(imapServer, ":")
 	if len(parts) != 2 {
-		log.Println("❌ Invalid IMAP_SERVER format. Expected format: hostname:port")
-		return nil, fmt.Errorf("invalid IMAP_SERVER format: %s", imapServer)
+		return nil, fmt.Errorf("❌ Invalid IMAP_SERVER format. Expected format: hostname:port")
 	}
 
-	host := parts[0]
-	port := parts[1]
-
-	var c *client.Client
+	host, port := parts[0], parts[1]
+	var imapClient *client.Client
 	var err error
 
-	// ✅ Check port to determine connection type
-	if port == "993" {
-		// Secure TLS connection
-		c, err = client.DialTLS(imapServer, &tls.Config{ServerName: host, InsecureSkipVerify: false})
-		if err != nil {
-			log.Println("❌ Failed to connect via TLS:", err)
-			return nil, fmt.Errorf("failed to connect to IMAP server via TLS: %w", err)
+	// ✅ Connect to IMAP Server
+	connectStart := time.Now()
+	switch port {
+	case "993":
+		imapClient, err = client.DialTLS(imapServer, &tls.Config{ServerName: host})
+	case "143":
+		imapClient, err = client.Dial(imapServer)
+		if err == nil {
+			err = imapClient.StartTLS(&tls.Config{ServerName: host})
 		}
-		log.Println("✅ Connected to IMAP server with SSL/TLS")
-	} else if port == "143" {
-		// Plain IMAP with STARTTLS
-		c, err = client.Dial(imapServer)
-		if err != nil {
-			log.Println("❌ Failed to connect via IMAP:", err)
-			return nil, fmt.Errorf("failed to connect to IMAP server: %w", err)
-		}
-
-		// ✅ Upgrade to secure connection using STARTTLS
-		if err := c.StartTLS(&tls.Config{ServerName: host, InsecureSkipVerify: false}); err != nil {
-			log.Println("❌ Failed to start TLS:", err)
-			c.Logout()
-			return nil, fmt.Errorf("failed to start TLS: %w", err)
-		}
-		log.Println("✅ STARTTLS successful")
-	} else {
-		log.Println("❌ Unsupported IMAP port:", port)
-		return nil, fmt.Errorf("unsupported IMAP port: %s", port)
+	default:
+		return nil, fmt.Errorf("❌ Unsupported IMAP port: %s", port)
 	}
 
-	// ✅ Ensure cleanup in case of error
-	defer func() {
-		if err != nil && c != nil {
-			c.Logout()
+	if err != nil {
+		return nil, fmt.Errorf("❌ Failed to connect to IMAP server: %w", err)
+	}
+	log.Printf("✅ IMAP server connection established in %v ms", time.Since(connectStart).Milliseconds())
+
+	// ✅ Login to IMAP
+	loginStart := time.Now()
+	if err := imapClient.Login(username, password); err != nil {
+		imapClient.Logout()
+		return nil, fmt.Errorf("❌ IMAP login failed: %w", err)
+	}
+	log.Printf("✅ IMAP login successful in %v ms", time.Since(loginStart).Milliseconds())
+
+	// ✅ Keep connection alive with NOOP
+	go func() {
+		for {
+			time.Sleep(40 * time.Minute) // Run every 5 minutes
+			if err := imapClient.Noop(); err != nil {
+				log.Println("⚠️ IMAP NOOP failed, connection might be lost:", err)
+			}
 		}
 	}()
 
-	// ✅ Login to IMAP
-	if err := c.Login(username, password); err != nil {
-		log.Println("❌ Failed to login:", err)
-		c.Logout()
-		return nil, fmt.Errorf("failed to login: %w", err)
-	}
+	log.Printf("✅ Total IMAP connection time: %v ms", time.Since(startTime).Milliseconds())
 
-	log.Println("✅ IMAP connection successful")
-	return c, nil
+	return imapClient, nil
 }
