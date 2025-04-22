@@ -4,17 +4,16 @@ import (
 	"time"
 )
 
-// Message represents an email message
 type Message struct {
-	ID          string       `json:"id"`
-	Subject     string       `json:"subject"`
-	To          string       `json:"to"`
-	From        string       `json:"from"`
-	FromName    string       `json:"from_name"` // Add sender's name
-	Date        string       `json:"date"`
-	Body        string       `json:"body"`
-	Attachments []Attachment `json:"attachments"`
-	//InlineImages []string     `json:"inline_images"`
+	ID  string `json:"id"`
+	UID uint32 `json:"uid"`
+
+	Subject         string   `json:"subject"`
+	From            string   `json:"from"`
+	FromName        string   `json:"from_name"`
+	To              string   `json:"to"`
+	Date            string   `json:"date"`
+	AttachmentNames []string `json:"attachment_names"` // ✅ Store attachment names
 }
 
 // Attachment represents an email attachment
@@ -41,4 +40,37 @@ type UserSession struct {
 	Name      string    `json:"name"` // Add this field
 	Email     string    `json:"email"`
 	LoginTime time.Time `json:"login_time"`
+}
+type OpdModel struct {
+	PatientName  string
+	DoctorName   string
+	OPDDate      string
+	OPDNotes     string
+	Prescription string
+	FollowupDate string
+	CreatedOn    string
+	GeneratedOn  string
+}
+type Recipient struct {
+	Email        string
+	MobileNumber string
+}
+type EmailInfo struct {
+	Date  time.Time
+	Email string
+}
+
+type PatientDataModel struct {
+	PatientName string `json:"patientName" bson:"Name"` // Match 'Name' field in MongoDB document
+	Email       string `json:"email" bson:"Email"`
+	Mobile      string `json:"mobile" bson:"Mobile"`
+	DOB         string `json:"dob" bson:"DOB"`
+	Gender      string `json:"gender" bson:"Gender"`
+	DoctorID    string `json:"doctorId" bson:"DoctorID"`
+	DoctorName  string `json:"doctorName" bson:"DoctorName"`
+}
+
+type RecipientInfo struct {
+	EmailId string `json:"emailId"`
+	Name    string `json:"name"` // Can be PatientName or fallback mobile
 }
