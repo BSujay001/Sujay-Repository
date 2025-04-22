@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 14px; margin: 10px; }
+    .center { text-align: center; font-weight: bold; margin: 0; }
+    .line { border-top: 1px solid rgba(0, 0, 0, 0.12); margin: 10px 0; }
+    p { margin: 4px 0; line-height: 1.4; }
+    table { width: 100%; }
+    td { vertical-align: top; }
+    
+  </style>
+</head>
+<body>
+  <div class="center"><u><center>OPD</center></u></div>
+  <br>
+  <div>
+  <hr>
+  <table style="width: 100%; table-layout: fixed;">
+    <tr>
+      <td style="text-align: left; width: 30%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        <strong>Patient Name:</strong> {{.PatientName}}
+      </td>
+      <td style="text-align: center; width: 40%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        <strong>Doctor Name:</strong> {{.DoctorName}}
+      </td>
+      <td style="text-align: right; width: 30%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+        <strong>OPD Date:</strong> {{.CreatedOn}}
+      </td>
+    </tr>
+  </table>
+  
+   <hr>
+
+    {{if .OPDNotes}}
+    <p><strong>OPD Notes:</strong> {{.OPDNotes}}</p>
+    {{end}}
+
+    {{if .Prescription}}
+    <p><strong>Prescription:</strong> {{.Prescription}}</p>
+    {{end}}
+
+    {{if .FollowupDate}}
+    <p><strong>Follow-up Date:</strong> {{.FollowupDate}}</p>
+    {{end}}
+
+    <hr>
+    
+    {{if .CreatedOn}}
+    <p><strong>Created on:</strong> {{.CreatedOn}}</p>
+    {{end}}
+  </div>
+  
+  <p style="text-align:center; margin-top: 10px;"><strong>******* END OF REPORT *******</strong></p>
+  
+</body>
+</html>

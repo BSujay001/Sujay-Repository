@@ -19,11 +19,16 @@
            
               <div class="px-4 py-3" style="background-color: #4CAF50;">
                 <div style="display: flex; justify-content: space-between;">
-                  <span style="font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 20px; padding-top: 4px; padding-bottom: 4px; color: white;">Vault Dashboard</span>
-                  <span style="font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 20px; padding-bottom: 4px; padding-top: 4px; color: white;">Welcome {{.FromName}} {{ .Email }} <span>
+                  <span style="font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 20px; padding-top: 4px; padding-bottom: 4px; color: white;">Vault Document</span>
+                  <span style="font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 20px; padding-bottom: 4px; padding-top: 4px; color: white;">Welcome  {{.FromName}} <span> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
                     
-                    <!-- <a href="/login" style="text-decoration: none; cursor: pointer; color: white;">Logout</a></span></span> -->
-                    <a href="javascript:void(0);" onclick="logout()" style="text-decoration: none; cursor: pointer; color: white;">Logout</a>
+                   
+                    <a href="javascript:void(0);" onclick="logout()" 
+                    style="text-decoration: none; cursor: pointer; color: white;" 
+                    onmouseover="this.style.textDecoration='underline'" 
+                    onmouseout="this.style.textDecoration='none'">
+                    <strong>Logout</strong>
+                  </a>
                   <!-- <span style="font-family: Roboto, Helvetica Neue, Helvetica, Arial, sans-serif; font-size: 20px; padding-bottom: 4px; padding-top: 4px; color: white; text-decoration: none; cursor: pointer;">Logout</span> -->
                 </div>
               </div>
